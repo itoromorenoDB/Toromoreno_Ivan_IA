@@ -9,6 +9,10 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Characters/TC_MinionCharacter.h"
+#include "Components/SphereComponent.h"
+#include "Perception/AISense_Damage.h"
+#include "Controllers/TC_MinionController.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -49,6 +53,10 @@ ATheCore_IACharacter::ATheCore_IACharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+
+	AttackArea = CreateDefaultSubobject<USphereComponent>(TEXT("AttackArea"));
+	AttackArea->SetSphereRadius(600.f);
+	AttackArea->SetupAttachment(RootComponent);
 }
 
 void ATheCore_IACharacter::BeginPlay()
@@ -64,6 +72,22 @@ void ATheCore_IACharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+
+	AttackArea->OnComponentBeginOverlap.AddUniqueDynamic(this, &ATheCore_IACharacter::OnSphereOverlapped);
+}
+
+void ATheCore_IACharacter::OnSphereOverlapped(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	ATC_MinionCharacter* Minion = Cast<ATC_MinionCharacter>(OtherActor);
+	if (Minion)
+	{
+		//UAISense_Damage::ReportDamageEvent(this, Cast<ATC_MinionController>(Minion->GetController()), this, 10.f, GetActorLocation(), OtherActor->GetActorLocation());
+	}
+}
+
+FGenericTeamId ATheCore_IACharacter::GetGenericTeamId() const
+{
+	return FGenericTeamId(static_cast<uint8>(Team));
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Characters/TC_MinionCharacter.h"
 #include "TC_SpawnPoint.generated.h"
 
 class ATC_MinionCharacter;
@@ -19,6 +20,8 @@ public:
 		TSubclassOf<ATC_MinionCharacter> ClassToSpawn;
 	UPROPERTY(EditAnywhere)
 		AActor* Target = nullptr;
+	UPROPERTY(EditAnywhere)
+		ETeam CurrentTeam = ETeam::None;
 
 	ATC_SpawnPoint();
 

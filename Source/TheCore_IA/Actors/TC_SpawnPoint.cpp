@@ -1,6 +1,5 @@
 #include "Actors/TC_SpawnPoint.h"
 #include "Controllers/TC_MinionController.h"
-#include "Characters/TC_MinionCharacter.h"
 
 ATC_SpawnPoint::ATC_SpawnPoint()
 {
@@ -29,6 +28,7 @@ void ATC_SpawnPoint::SpawnMinion()
 	}
 
 	SpawnedMinion->SpawnDefaultController();
+	SpawnedMinion->CurrentTeam = CurrentTeam;
 	ATC_MinionController* MinionController = Cast<ATC_MinionController>(SpawnedMinion->GetController());
 	if (MinionController)
 	{
