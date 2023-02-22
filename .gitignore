@@ -75,5 +75,5 @@ Plugins/Developer/RiderLink
 
 # Cache files for the editor to use
 DerivedDataCache/*
-Content/__ExternalActors__
-Content/__ExternalObjects__
+#Content/__ExternalActors__
+#Content/__ExternalObjects__
