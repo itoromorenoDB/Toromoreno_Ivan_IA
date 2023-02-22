@@ -16,6 +16,7 @@ enum class ETeam : uint8
 
 class USphereComponent;
 class UAnimMontage;
+class UBehaviorTree;
 
 UCLASS()
 class THECORE_IA_API ATC_MinionCharacter : public ACharacter, public IGenericTeamAgentInterface
@@ -27,6 +28,9 @@ public:
 		USphereComponent* SphereComponent = nullptr;
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 		UAnimMontage* Punch = nullptr;
+	UPROPERTY(EditDefaultsOnly, Category = "IA")
+		UBehaviorTree* BehaviorTree = nullptr;
+
 	ETeam CurrentTeam = ETeam::None;
 
 	ATC_MinionCharacter();

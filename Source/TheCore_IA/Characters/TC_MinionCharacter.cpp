@@ -1,4 +1,6 @@
 #include "Characters/TC_MinionCharacter.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "BehaviorTree/Blackboard/BlackboardKeyType_Bool.h"
 #include "Components/SphereComponent.h"
 #include "Controllers/TC_MinionController.h"
 #include "Interfaces/TC_DamageableInterface.h"
@@ -45,7 +47,7 @@ void ATC_MinionCharacter::OnSphereOverlapped(UPrimitiveComponent* OverlappedComp
 	{
 		if (ATC_MinionController* MyController = Cast<ATC_MinionController>(GetController()))
 		{
-			MyController->ChangeFSMState(EState::AttackTarget);
+			MyController->BlackboardComponent->SetValue<UBlackboardKeyType_Bool>("CanAttack", true);
 		}
 	}
 }
