@@ -1,34 +1,33 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Characters/Infected/TC_BaseInfected.h"
+#include "Components/SplineComponent.h"
 
-// Sets default values
 ATC_BaseInfected::ATC_BaseInfected()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	SplineComponent = CreateDefaultSubobject<USplineComponent>(TEXT("SplineComponent"));
+	SplineComponent->SetupAttachment(RootComponent);
+#if WITH_EDITOR
+	SplineComponent->bDrawDebug = true;
+#endif
 }
 
-// Called when the game starts or when spawned
 void ATC_BaseInfected::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	FillSplinePoints();
 }
 
-// Called every frame
 void ATC_BaseInfected::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
-// Called to bind functionality to input
-void ATC_BaseInfected::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void ATC_BaseInfected::FillSplinePoints()
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
+	for (int32 Index = 0; Index <= SplineComponent->GetNumberOfSplinePoints(); ++Index)
+	{
+		SplinePoints.Add(SplineComponent->GetLocationAtSplinePoint(Index, ESplineCoordinateSpace::World));
+	}
 }
-

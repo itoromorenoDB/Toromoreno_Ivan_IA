@@ -7,6 +7,7 @@
 #include "TC_BaseInfected.generated.h"
 
 class UBehaviorTree;
+class USplineComponent;
 
 UCLASS()
 class THECORE_IA_API ATC_BaseInfected : public ACharacter
@@ -17,11 +18,18 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 		UBehaviorTree* BehaviorTree = nullptr;
+	UPROPERTY(EditAnywhere, Category = "Patrol")
+		USplineComponent* SplineComponent = nullptr;
+
 	ATC_BaseInfected();
 
 	virtual void Tick(float DeltaTime) override;
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-protected:
+	void FillSplinePoints();
 
+protected:
 	virtual void BeginPlay() override;
+
+private:
+	UPROPERTY()
+		TArray<FVector> SplinePoints;
 };
