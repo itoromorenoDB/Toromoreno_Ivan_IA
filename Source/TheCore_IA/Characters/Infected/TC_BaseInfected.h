@@ -20,11 +20,15 @@ public:
 		UBehaviorTree* BehaviorTree = nullptr;
 	UPROPERTY(EditAnywhere, Category = "Patrol")
 		USplineComponent* SplineComponent = nullptr;
+	UPROPERTY(EditAnywhere, Category = "Patrol")
+		USplineComponent* HearingSplineComponent = nullptr;
 
 	ATC_BaseInfected();
 
 	virtual void Tick(float DeltaTime) override;
-	void FillSplinePoints();
+	void FillSplinePoints(TArray<FVector>& Points, USplineComponent* Spline);
+	const TArray<FVector>& GetSplinePoints() const;
+	const TArray<FVector>& GetHearingSplinePoints() const;
 
 protected:
 	virtual void BeginPlay() override;
@@ -32,4 +36,6 @@ protected:
 private:
 	UPROPERTY()
 		TArray<FVector> SplinePoints;
+	UPROPERTY()
+		TArray<FVector> HearingSplinePoints;
 };

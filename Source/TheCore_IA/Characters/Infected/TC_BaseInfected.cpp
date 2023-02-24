@@ -7,8 +7,13 @@ ATC_BaseInfected::ATC_BaseInfected()
 
 	SplineComponent = CreateDefaultSubobject<USplineComponent>(TEXT("SplineComponent"));
 	SplineComponent->SetupAttachment(RootComponent);
+
+	HearingSplineComponent = CreateDefaultSubobject<USplineComponent>(TEXT("HearingSplineComponent"));
+	HearingSplineComponent->SetupAttachment(RootComponent);
+
 #if WITH_EDITOR
 	SplineComponent->bDrawDebug = true;
+	HearingSplineComponent->bDrawDebug = true;
 #endif
 }
 
@@ -16,7 +21,8 @@ void ATC_BaseInfected::BeginPlay()
 {
 	Super::BeginPlay();
 
-	FillSplinePoints();
+	FillSplinePoints(SplinePoints, SplineComponent);
+	FillSplinePoints(HearingSplinePoints, HearingSplineComponent);
 }
 
 void ATC_BaseInfected::Tick(float DeltaTime)
@@ -24,10 +30,20 @@ void ATC_BaseInfected::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ATC_BaseInfected::FillSplinePoints()
+void ATC_BaseInfected::FillSplinePoints(TArray<FVector>& Points, USplineComponent* Spline)
 {
-	for (int32 Index = 0; Index <= SplineComponent->GetNumberOfSplinePoints(); ++Index)
+	for (int32 Index = 0; Index <= Spline->GetNumberOfSplinePoints(); ++Index)
 	{
-		SplinePoints.Add(SplineComponent->GetLocationAtSplinePoint(Index, ESplineCoordinateSpace::World));
+		Points.Add(Spline->GetLocationAtSplinePoint(Index, ESplineCoordinateSpace::World));
 	}
+}
+
+const TArray<FVector>& ATC_BaseInfected::GetSplinePoints() const
+{
+	return SplinePoints;
+}
+
+const TArray<FVector>& ATC_BaseInfected::GetHearingSplinePoints() const
+{
+	return HearingSplinePoints;
 }

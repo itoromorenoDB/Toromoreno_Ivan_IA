@@ -9,6 +9,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Perception/AISense_Hearing.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -83,7 +84,7 @@ void ATheCore_IACharacter::SetupPlayerInputComponent(class UInputComponent* Play
 
 		//Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ATheCore_IACharacter::Look);
-
+		EnhancedInputComponent->BindAction(ScreamAction, ETriggerEvent::Triggered, this, &ATheCore_IACharacter::Scream);
 	}
 
 }
@@ -124,6 +125,10 @@ void ATheCore_IACharacter::Look(const FInputActionValue& Value)
 	}
 }
 
+void ATheCore_IACharacter::Scream()
+{
+	UAISense_Hearing::ReportNoiseEvent(this, GetActorLocation(), 1.f, GetController());
+}
 
 
 
