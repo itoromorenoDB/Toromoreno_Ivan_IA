@@ -83,6 +83,7 @@ void ATC_BaseInfectedController::SmartObjectChanged(ATC_SmartObjectBase* NewSmar
 {
 	if (NewSmartObject)
 	{
+		FGameplayTag Subtag;
 		BehaviorTreeComponent->SetDynamicSubtree(Subtag, NewSmartObject->BehaviorTree);
 	}
 }
