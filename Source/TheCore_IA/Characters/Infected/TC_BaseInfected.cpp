@@ -1,49 +1,23 @@
 #include "Characters/Infected/TC_BaseInfected.h"
 #include "Components/SplineComponent.h"
 
-ATC_BaseInfected::ATC_BaseInfected()
+void ATC_BaseInfected::ResetSmartObject()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	SetCurrentSmartObject(MainSmartObject);
+}
 
-	SplineComponent = CreateDefaultSubobject<USplineComponent>(TEXT("SplineComponent"));
-	SplineComponent->SetupAttachment(RootComponent);
-
-	HearingSplineComponent = CreateDefaultSubobject<USplineComponent>(TEXT("HearingSplineComponent"));
-	HearingSplineComponent->SetupAttachment(RootComponent);
-
-#if WITH_EDITOR
-	SplineComponent->bDrawDebug = true;
-	HearingSplineComponent->bDrawDebug = true;
-#endif
+void ATC_BaseInfected::SetCurrentSmartObject(ATC_SmartObjectBase* NewSmartObject)
+{
+	CurrentSmartObject = NewSmartObject;
+	OnSmartObjectChanged.ExecuteIfBound(CurrentSmartObject);
 }
 
 void ATC_BaseInfected::BeginPlay()
 {
 	Super::BeginPlay();
 
-	FillSplinePoints(SplinePoints, SplineComponent);
-	FillSplinePoints(HearingSplinePoints, HearingSplineComponent);
-}
-
-void ATC_BaseInfected::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
-void ATC_BaseInfected::FillSplinePoints(TArray<FVector>& Points, USplineComponent* Spline)
-{
-	for (int32 Index = 0; Index <= Spline->GetNumberOfSplinePoints(); ++Index)
+	if (CurrentSmartObject)
 	{
-		Points.Add(Spline->GetLocationAtSplinePoint(Index, ESplineCoordinateSpace::World));
+		MainSmartObject = CurrentSmartObject;
 	}
-}
-
-const TArray<FVector>& ATC_BaseInfected::GetSplinePoints() const
-{
-	return SplinePoints;
-}
-
-const TArray<FVector>& ATC_BaseInfected::GetHearingSplinePoints() const
-{
-	return HearingSplinePoints;
 }

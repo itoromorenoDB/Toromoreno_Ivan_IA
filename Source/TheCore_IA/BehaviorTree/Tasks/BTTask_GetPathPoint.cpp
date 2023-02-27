@@ -1,4 +1,5 @@
 #include "BehaviorTree/Tasks/BTTask_GetPathPoint.h"
+#include "Actors/SmartObjects/TC_SmartObjectPatrol.h"
 #include "AIController.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Vector.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -18,7 +19,8 @@ EBTNodeResult::Type UBTTask_GetPathPoint::ExecuteTask(UBehaviorTreeComponent& Ow
 	if (!MyInfected || !BlackboardComponent)
 		return EBTNodeResult::Failed;
 
-	const TArray<FVector>& SplinePoints = bIsHearing ? MyInfected->GetHearingSplinePoints() : MyInfected->GetSplinePoints();
+	ATC_SmartObjectPatrol* SmartObjectPatrol = Cast<ATC_SmartObjectPatrol>(MyInfected->CurrentSmartObject);
+	const TArray<FVector>& SplinePoints = SmartObjectPatrol ? SmartObjectPatrol->GetSplinePoints() : TArray<FVector>();
 	if (SplinePoints.IsEmpty())
 		return EBTNodeResult::Succeeded;
 

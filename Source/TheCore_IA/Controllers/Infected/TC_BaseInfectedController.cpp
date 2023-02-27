@@ -1,10 +1,12 @@
 #include "Controllers/Infected/TC_BaseInfectedController.h"
+#include "Actors/SmartObjects/TC_SmartObjectBase.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Object.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Vector.h"
 #include "Characters/Infected/TC_BaseInfected.h"
+#include "GameplayTags/Classes/GameplayTagContainer.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISenseConfig_Hearing.h"
@@ -31,6 +33,16 @@ ATC_BaseInfectedController::ATC_BaseInfectedController() : Super()
 	PerceptionComponent->SetDominantSense(SightConfig->GetSenseImplementation());
 }
 
+void ATC_BaseInfectedController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (!CurrentAgent)
+		return;
+
+	SmartObjectChanged(CurrentAgent->CurrentSmartObject);
+}
+
 void ATC_BaseInfectedController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
@@ -43,6 +55,8 @@ void ATC_BaseInfectedController::OnPossess(APawn* InPawn)
 		BehaviorTreeComponent->StartTree(*BehaviorTree);
 	}
 
+	CurrentAgent = Cast<ATC_BaseInfected>(GetPawn());
+	CurrentAgent->OnSmartObjectChanged.BindUObject(this, &ATC_BaseInfectedController::SmartObjectChanged);
 	PerceptionComponent->OnTargetPerceptionUpdated.AddUniqueDynamic(this, &ATC_BaseInfectedController::OnTargetPerceptionUpdated);
 }
 
@@ -62,6 +76,14 @@ void ATC_BaseInfectedController::OnTargetPerceptionUpdated(AActor* Actor, FAISti
 	else
 	{
 		ManageSight(nullptr);
+	}
+}
+
+void ATC_BaseInfectedController::SmartObjectChanged(ATC_SmartObjectBase* NewSmartObject)
+{
+	if (NewSmartObject)
+	{
+		BehaviorTreeComponent->SetDynamicSubtree(Subtag, NewSmartObject->BehaviorTree);
 	}
 }
 

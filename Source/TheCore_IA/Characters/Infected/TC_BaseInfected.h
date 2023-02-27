@@ -8,6 +8,9 @@
 
 class UBehaviorTree;
 class USplineComponent;
+class ATC_SmartObjectBase;
+
+DECLARE_DELEGATE_OneParam(FSmartObjectChanged, ATC_SmartObjectBase*)
 
 UCLASS()
 class THECORE_IA_API ATC_BaseInfected : public ACharacter
@@ -18,24 +21,16 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 		UBehaviorTree* BehaviorTree = nullptr;
-	UPROPERTY(EditAnywhere, Category = "Patrol")
-		USplineComponent* SplineComponent = nullptr;
-	UPROPERTY(EditAnywhere, Category = "Patrol")
-		USplineComponent* HearingSplineComponent = nullptr;
+	UPROPERTY(EditAnywhere, Category = AI)
+		ATC_SmartObjectBase* CurrentSmartObject = nullptr;
+	UPROPERTY()
+		ATC_SmartObjectBase* MainSmartObject = nullptr;
 
-	ATC_BaseInfected();
+	FSmartObjectChanged OnSmartObjectChanged;
 
-	virtual void Tick(float DeltaTime) override;
-	void FillSplinePoints(TArray<FVector>& Points, USplineComponent* Spline);
-	const TArray<FVector>& GetSplinePoints() const;
-	const TArray<FVector>& GetHearingSplinePoints() const;
+	void ResetSmartObject();
+	void SetCurrentSmartObject(ATC_SmartObjectBase* NewSmartObject);
 
 protected:
-	virtual void BeginPlay() override;
-
-private:
-	UPROPERTY()
-		TArray<FVector> SplinePoints;
-	UPROPERTY()
-		TArray<FVector> HearingSplinePoints;
+	void BeginPlay() override;
 };
