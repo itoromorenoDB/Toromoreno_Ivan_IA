@@ -10,8 +10,18 @@
 class UBehaviorTree;
 class USplineComponent;
 class ATC_SmartObjectBase;
+class USphereComponent;
 
 DECLARE_DELEGATE_OneParam(FSmartObjectChanged, ATC_SmartObjectBase*)
+
+USTRUCT(BlueprintType)
+struct FTC_ComboInformation
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly)
+		TArray<UAnimMontage*> Attacks;
+};
 
 UCLASS()
 class THECORE_IA_API ATC_BaseInfected : public ACharacter
@@ -26,6 +36,10 @@ public:
 		ATC_SmartObjectBase* CurrentSmartObject = nullptr;
 	UPROPERTY()
 		ATC_SmartObjectBase* MainSmartObject = nullptr;
+	UPROPERTY(EditDefaultsOnly)
+		FTC_ComboInformation ComboInformation;
+	UPROPERTY(EditDefaultsOnly)
+		USphereComponent* SphereComponent = nullptr;
 
 	uint8 CurrentTeam;
 	FSmartObjectChanged OnSmartObjectChanged;
@@ -37,4 +51,13 @@ public:
 
 protected:
 	void BeginPlay() override;
+
+private:
+
+	UFUNCTION()
+		void OnAttackAreaOverlapped(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+		void OnAttackAreaOverlappedEnded(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	void SetCanAttack(AActor* ActorToAttack, bool bCanAttack);
 };
