@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include <GenericTeamAgentInterface.h>
 #include "TC_BaseInfected.generated.h"
 
 class UBehaviorTree;
@@ -26,7 +27,10 @@ public:
 	UPROPERTY()
 		ATC_SmartObjectBase* MainSmartObject = nullptr;
 
+	uint8 CurrentTeam;
 	FSmartObjectChanged OnSmartObjectChanged;
+
+	ATC_BaseInfected();
 
 	void ResetSmartObject();
 	void SetCurrentSmartObject(ATC_SmartObjectBase* NewSmartObject);

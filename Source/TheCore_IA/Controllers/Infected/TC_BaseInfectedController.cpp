@@ -10,6 +10,8 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISenseConfig_Hearing.h"
+#include <GameFramework/CharacterMovementComponent.h>
+#include "Actors/SmartObjects/TC_SmartObjectQuiet.h"
 
 ATC_BaseInfectedController::ATC_BaseInfectedController() : Super()
 {
@@ -24,13 +26,24 @@ ATC_BaseInfectedController::ATC_BaseInfectedController() : Super()
 	SightConfig->PeripheralVisionAngleDegrees = 45.f;
 
 	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
-	SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
-	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
+	SightConfig->DetectionByAffiliation.bDetectFriendlies = false;
+	SightConfig->DetectionByAffiliation.bDetectNeutrals = false;
 
-	PerceptionComponent->ConfigureSense(*SightConfig);
+	HearingConfig->DetectionByAffiliation.bDetectEnemies = true;
+	HearingConfig->DetectionByAffiliation.bDetectFriendlies = false;
+	HearingConfig->DetectionByAffiliation.bDetectNeutrals = false;
+
 	PerceptionComponent->ConfigureSense(*HearingConfig);
+	PerceptionComponent->ConfigureSense(*SightConfig);
 
 	PerceptionComponent->SetDominantSense(SightConfig->GetSenseImplementation());
+
+}
+
+FGenericTeamId ATC_BaseInfectedController::GetGenericTeamId() const
+{
+	ATC_BaseInfected* Infected = Cast<ATC_BaseInfected>(GetPawn());
+	return Infected ? FGenericTeamId(Infected->CurrentTeam) : FGenericTeamId();
 }
 
 void ATC_BaseInfectedController::BeginPlay()
@@ -41,6 +54,12 @@ void ATC_BaseInfectedController::BeginPlay()
 		return;
 
 	SmartObjectChanged(CurrentAgent->CurrentSmartObject);
+
+	if (ATC_SmartObjectQuiet* Quiet = Cast<ATC_SmartObjectQuiet>(CurrentAgent->CurrentSmartObject))
+	{
+		BlackboardComponent->SetValueAsVector("InitPosition", Quiet->InitTransform.GetLocation());
+	}
+
 }
 
 void ATC_BaseInfectedController::OnPossess(APawn* InPawn)
@@ -62,9 +81,17 @@ void ATC_BaseInfectedController::OnPossess(APawn* InPawn)
 
 void ATC_BaseInfectedController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
+	ACharacter* InfectedChar = Cast<ACharacter>(GetPawn());
+	UCharacterMovementComponent* MovementComp = InfectedChar ? InfectedChar->GetCharacterMovement() : nullptr;
+
 	if (Stimulus.WasSuccessfullySensed())
 	{
-		if (IsValidStimulus<UAISense_Sight>(Stimulus))
+		if (MovementComp)
+		{
+			MovementComp->MaxWalkSpeed = 300.f;
+		}
+
+		if (IsValidStimulus<UAISense_Sight>(Stimulus) && bCanUseSight)
 		{
 			ManageSight(Actor);
 		}
@@ -75,7 +102,17 @@ void ATC_BaseInfectedController::OnTargetPerceptionUpdated(AActor* Actor, FAISti
 	}
 	else
 	{
-		ManageSight(nullptr);
+		if (MovementComp)
+		{
+			MovementComp->MaxWalkSpeed = 50.f;
+		}
+
+		if (bCanUseSight)
+		{
+			ManageSight(nullptr);
+		}
+
+		BlackboardComponent->ClearValue("HearingLocation");
 	}
 }
 

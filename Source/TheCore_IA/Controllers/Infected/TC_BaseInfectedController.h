@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
+#include <Perception/AIPerceptionSystem.h>
 #include "TC_BaseInfectedController.generated.h"
 
 class UBehaviorTreeComponent;
@@ -10,6 +11,13 @@ class UAISenseConfig_Sight;
 class UAISenseConfig_Hearing;
 class ATC_BaseInfected;
 class ATC_SmartObjectBase;
+
+UENUM()
+enum class ETeams : uint8
+{
+	Zombies,
+	Characters
+};
 
 UCLASS()
 class THECORE_IA_API ATC_BaseInfectedController : public AAIController
@@ -26,8 +34,11 @@ public:
 		UAISenseConfig_Sight* SightConfig = nullptr;
 	UPROPERTY(EditDefaultsOnly)
 		UAISenseConfig_Hearing* HearingConfig = nullptr;
-
+	UPROPERTY(EditDefaultsOnly)
+		bool bCanUseSight = true;
 	ATC_BaseInfectedController();
+
+	virtual FGenericTeamId GetGenericTeamId() const override;
 
 protected:
 
@@ -36,21 +47,21 @@ protected:
 
 	virtual void BeginPlay() override;
 	virtual void OnPossess(APawn* InPawn) override;
+	void ManageHearing(const FVector& HearingLocation);
 
-private:
-
-	UFUNCTION()
-		void OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
-	
 	template<class T>
 	bool IsValidStimulus(FAIStimulus Stimulus)
 	{
 		return UAIPerceptionSystem::GetSenseClassForStimulus(GetWorld(), Stimulus) == T::StaticClass();
 	}
 
+private:
+
+	UFUNCTION()
+		virtual void OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
+
 	void SmartObjectChanged(ATC_SmartObjectBase* NewSmartObject);
 
 	void ManageSight(AActor* Actor);
-	void ManageHearing(const FVector& HearingLocation);
 	
 };
