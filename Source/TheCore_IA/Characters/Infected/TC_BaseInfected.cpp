@@ -5,6 +5,7 @@
 #include <Components/SphereComponent.h>
 #include "TheCore_IACharacter.h"
 #include <BehaviorTree/BlackboardComponent.h>
+#include "Actors/TC_Projectile.h"
 
 ATC_BaseInfected::ATC_BaseInfected() : Super()
 {
@@ -24,6 +25,14 @@ void ATC_BaseInfected::SetCurrentSmartObject(ATC_SmartObjectBase* NewSmartObject
 	OnSmartObjectChanged.ExecuteIfBound(CurrentSmartObject);
 }
 
+void ATC_BaseInfected::Shoot()
+{
+	FActorSpawnParameters Params;
+	Params.Owner = this;
+	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	GetWorld()->SpawnActor<ATC_Projectile>(ProjectileToSpawn, GetActorTransform(), Params);
+}
+
 void ATC_BaseInfected::BeginPlay()
 {
 	Super::BeginPlay();
@@ -40,6 +49,11 @@ void ATC_BaseInfected::BeginPlay()
 void ATC_BaseInfected::OnAttackAreaOverlapped(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	SetCanAttack(OtherActor, true);
+	ATC_BaseInfectedController* MyController = Cast<ATC_BaseInfectedController>(GetController());
+	if (!MyController)
+		return;
+
+	MyController->ManageAttack();
 }
 
 void ATC_BaseInfected::OnAttackAreaOverlappedEnded(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)

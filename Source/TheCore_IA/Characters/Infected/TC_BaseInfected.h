@@ -11,6 +11,7 @@ class UBehaviorTree;
 class USplineComponent;
 class ATC_SmartObjectBase;
 class USphereComponent;
+class ATC_Projectile;
 
 DECLARE_DELEGATE_OneParam(FSmartObjectChanged, ATC_SmartObjectBase*)
 
@@ -31,6 +32,8 @@ class THECORE_IA_API ATC_BaseInfected : public ACharacter
 public:
 
 	UPROPERTY(EditDefaultsOnly)
+		TSubclassOf<ATC_Projectile> ProjectileToSpawn;
+	UPROPERTY(EditDefaultsOnly)
 		UBehaviorTree* BehaviorTree = nullptr;
 	UPROPERTY(EditAnywhere, Category = AI)
 		ATC_SmartObjectBase* CurrentSmartObject = nullptr;
@@ -48,7 +51,7 @@ public:
 
 	void ResetSmartObject();
 	void SetCurrentSmartObject(ATC_SmartObjectBase* NewSmartObject);
-
+	void Shoot();
 protected:
 	void BeginPlay() override;
 

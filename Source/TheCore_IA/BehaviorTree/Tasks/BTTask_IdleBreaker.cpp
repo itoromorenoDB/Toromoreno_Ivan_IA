@@ -3,6 +3,7 @@
 #include "Characters/Infected/TC_BaseInfected.h"
 #include "Kismet/KismetMathLibrary.h"
 #include <Animation/AnimMontage.h>
+#include "Controllers/Infected/TC_BaseInfectedController.h"
 
 UBTTask_IdleBreaker::UBTTask_IdleBreaker() : Super()
 {
@@ -32,7 +33,22 @@ EBTNodeResult::Type UBTTask_IdleBreaker::ExecuteTask(UBehaviorTreeComponent& Own
 	const float FinishDelay = MontageToPlay->GetPlayLength();
 
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UBTTask_IdleBreaker::OnTimerFinished, FinishDelay, false);
+	WaitForMessage(OwnerComp, ATC_BaseInfectedController_Consts::SightLocationSet, ATC_BaseInfectedController_Consts::SightRequestID);
+	WaitForMessage(OwnerComp, ATC_BaseInfectedController_Consts::HearingLocationSet, ATC_BaseInfectedController_Consts::HearingRequestID);
+	WaitForMessage(OwnerComp, ATC_BaseInfectedController_Consts::Attacking, ATC_BaseInfectedController_Consts::AttackRequestID);
 	return EBTNodeResult::InProgress;
+}
+
+void UBTTask_IdleBreaker::OnMessage(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, FName Message, int32 RequestID, bool bSuccess)
+{
+	if (Message == ATC_BaseInfectedController_Consts::HearingLocationSet && ATC_BaseInfectedController_Consts::HearingRequestID || 
+		Message == ATC_BaseInfectedController_Consts::SightLocationSet && ATC_BaseInfectedController_Consts::SightRequestID || 
+		Message == ATC_BaseInfectedController_Consts::Attacking && ATC_BaseInfectedController_Consts::AttackRequestID)
+	{
+		CachedSkelMesh->Stop();
+		CachedSkelMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+		FinishLatentTask(*MyOwnerComp, EBTNodeResult::Succeeded);
+	}
 }
 
 void UBTTask_IdleBreaker::OnTimerFinished()

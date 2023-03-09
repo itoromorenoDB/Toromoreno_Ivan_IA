@@ -12,6 +12,7 @@
 #include "Perception/AISenseConfig_Hearing.h"
 #include <GameFramework/CharacterMovementComponent.h>
 #include "Actors/SmartObjects/TC_SmartObjectQuiet.h"
+#include <Kismet/GameplayStatics.h>
 
 ATC_BaseInfectedController::ATC_BaseInfectedController() : Super()
 {
@@ -59,6 +60,8 @@ void ATC_BaseInfectedController::BeginPlay()
 	{
 		BlackboardComponent->SetValueAsVector("InitPosition", Quiet->InitTransform.GetLocation());
 	}
+
+	BlackboardComponent->SetValueAsObject("Player", UGameplayStatics::GetPlayerCharacter(this, 0));
 
 }
 
@@ -129,9 +132,22 @@ void ATC_BaseInfectedController::ManageSight(AActor* Actor)
 {
 	BlackboardComponent->SetValue<UBlackboardKeyType_Object>("TargetActor", Actor);
 	BlackboardComponent->ClearValue("HearingLocation");
+	ManageMsg(ATC_BaseInfectedController_Consts::SightLocationSet, ATC_BaseInfectedController_Consts::SightRequestID, FAIMessage::Success);
+}
+
+void ATC_BaseInfectedController::ManageMsg(FName MessageName, int32 RequestId, FAIMessage::EStatus Status)
+{
+	FAIMessage Msg(MessageName, this, RequestId, Status);
+	FAIMessage::Send(this, Msg);
 }
 
 void ATC_BaseInfectedController::ManageHearing(const FVector& HearingLocation)
 {
 	BlackboardComponent->SetValue<UBlackboardKeyType_Vector>("HearingLocation", HearingLocation);
+	ManageMsg(ATC_BaseInfectedController_Consts::HearingLocationSet, ATC_BaseInfectedController_Consts::HearingRequestID, FAIMessage::Success);
+}
+
+void ATC_BaseInfectedController::ManageAttack()
+{
+	ManageMsg(ATC_BaseInfectedController_Consts::Attacking, ATC_BaseInfectedController_Consts::AttackRequestID, FAIMessage::Success);
 }
