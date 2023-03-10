@@ -1,13 +1,18 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "{EBDBDA6A-4C7E-20A5-7AFA-2A8948DB4893}",
+	"EngineAssociation": "5.1",
 	"Category": "",
 	"Description": "",
 	"Modules": [
 		{
 			"Name": "TheCore_IA",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"CoreUObject",
+				"Engine",
+				"AIModule"
+			]
 		}
 	],
 	"Plugins": [
@@ -16,6 +21,14 @@
 			"Enabled": true,
 			"TargetAllowList": [
 				"Editor"
+			]
+		},
+		{
+			"Name": "VisualStudioTools",
+			"Enabled": true,
+			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/362651520df94e4fa65492dbcba44ae2",
+			"SupportedTargetPlatforms": [
+				"Win64"
 			]
 		}
 	]

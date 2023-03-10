@@ -4,11 +4,14 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
+#include "Components/SphereComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Characters/TC_MinionCharacter.h"
+#include "Perception/AISense_Damage.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -49,6 +52,15 @@ ATheCore_IACharacter::ATheCore_IACharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+
+	/*AttackArea = CreateDefaultSubobject<USphereComponent>(TEXT("Attack Area"));
+	AttackArea->SetupAttachment(RootComponent);
+	AttackArea->SetSphereRadius(600.f);*/
+}
+
+FGenericTeamId ATheCore_IACharacter::GetGenericTeamId() const
+{
+	return FGenericTeamId(static_cast<uint8>(CurrentTeam));
 }
 
 void ATheCore_IACharacter::BeginPlay()
@@ -63,6 +75,15 @@ void ATheCore_IACharacter::BeginPlay()
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
+	}
+	//AttackArea->OnComponentBeginOverlap.AddUniqueDynamic(this, &ATheCore_IACharacter::OnSphereOverlapped);
+}
+
+void ATheCore_IACharacter::OnSphereOverlapped(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (ATC_MinionCharacter* Minion = Cast<ATC_MinionCharacter>(OtherActor))
+	{
+		UAISense_Damage::ReportDamageEvent(this, Minion->GetController(), this, 10.f, GetActorLocation(), OtherActor->GetActorLocation());
 	}
 }
 

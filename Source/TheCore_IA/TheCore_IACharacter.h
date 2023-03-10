@@ -5,11 +5,13 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "GenericTeamAgentInterface.h"
+#include "Characters/TC_MinionCharacter.h"
 #include "TheCore_IACharacter.generated.h"
 
 
 UCLASS(config=Game)
-class ATheCore_IACharacter : public ACharacter
+class ATheCore_IACharacter : public ACharacter, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -37,8 +39,12 @@ class ATheCore_IACharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* LookAction;
 
+	UPROPERTY(EditDefaultsOnly)
+		class USphereComponent* AttackArea = nullptr;
+
 public:
 	ATheCore_IACharacter();
+	FGenericTeamId GetGenericTeamId() const override;
 	
 
 protected:
@@ -62,5 +68,9 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	UFUNCTION()
+		void OnSphereOverlapped(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	ETeam CurrentTeam = ETeam::TeamBlue;
 };
 
