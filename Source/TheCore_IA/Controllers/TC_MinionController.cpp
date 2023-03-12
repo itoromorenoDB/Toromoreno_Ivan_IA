@@ -1,18 +1,27 @@
-#include "Controllers/TC_MinionController.h"
+#include "TC_MinionController.h"
+#include "TheCore_IACharacter.h"
+#include "Characters/TC_MinionCharacter.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISenseConfig_Damage.h"
 #include "Perception/AIPerceptionComponent.h"
-#include "TheCore_IACharacter.h"
+#include "BehaviorTree/BehaviorTreeComponent.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/Blackboard/BlackboardKeyType_Object.h"
+#include "BehaviorTree/Blackboard/BlackboardKeyType_Bool.h"
 
 ATC_MinionController::ATC_MinionController() : Super()
 {
-	FSMComponent = CreateDefaultSubobject<UTC_FSMComponents>(TEXT("FSM Component"));
+	//FSMComponent = CreateDefaultSubobject<UTC_FSMComponents>(TEXT("FSM Component"));
 	ConfigSight = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("Config sight"));
 	ConfigDamage = CreateDefaultSubobject<UAISenseConfig_Damage>(TEXT("Config damage"));
 
 	PerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("Perception Component"));
 
-	ConfigSight->SightRadius = 1000.f;
+	BehaviorTreeComponent = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("Behavior Tree Component"));
+	BlackboardComponent = CreateDefaultSubobject<UBlackboardComponent>(TEXT("Blackboard Component"));
+
+	ConfigSight->SightRadius = 800.f;
 	ConfigSight->LoseSightRadius = ConfigSight->SightRadius + 20.f;
 	ConfigSight->PeripheralVisionAngleDegrees = 360.f;
 	ConfigSight->DetectionByAffiliation.bDetectEnemies = true;
@@ -30,6 +39,21 @@ FGenericTeamId ATC_MinionController::GetGenericTeamId() const
 	return Minion ? Minion->GetGenericTeamId() : FGenericTeamId();
 }
 
+void ATC_MinionController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+
+	ATC_MinionCharacter* Minion = Cast<ATC_MinionCharacter>(InPawn);
+	UBehaviorTree* BehaviorTree = Minion ? Minion->BehaviorTree : nullptr;
+	if (BehaviorTree)
+	{
+		BlackboardComponent->InitializeBlackboard(*BehaviorTree->BlackboardAsset);
+		BehaviorTreeComponent->StartTree(*BehaviorTree);
+
+		BlackboardComponent->SetValue<UBlackboardKeyType_Bool>("CanAttack", false);
+	}
+}
+
 AActor* ATC_MinionController::GetTarget() const
 {
 	return CurrentTarget.IsValid() ? CurrentTarget.Get() : nullptr;
@@ -39,13 +63,14 @@ void ATC_MinionController::SetTarget(AActor* NewTarget)
 {
 	if (CurrentTarget.Get() == NewTarget)
 		return;
+	BlackboardComponent->SetValue<UBlackboardKeyType_Object>("TargetActor", NewTarget);
 	CurrentTarget = NewTarget;
 	TargetChanged.ExecuteIfBound(NewTarget);
 }
 
 void ATC_MinionController::InitFSM()
 {
-	ChangeFSMState(EState::GoToTarget);
+	//ChangeFSMState(EState::GoToTarget);
 	MainTarget = CurrentTarget;
 }
 
@@ -53,7 +78,7 @@ void ATC_MinionController::ChangeFSMState(EState State)
 {
 	if (FSMComponent)
 	{
-		FSMComponent->ChangeState(State);
+		//FSMComponent->ChangeState(State);
 	}
 }
 

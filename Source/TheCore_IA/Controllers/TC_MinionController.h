@@ -8,6 +8,8 @@
 
 class UAISenseConfig_Sight;
 class UAISenseConfig_Damage;
+class UBehaviorTreeComponent;
+class UBlackboardComponent;
 
 DECLARE_DELEGATE_OneParam(FOnTargetChanged, AActor*);
 
@@ -23,17 +25,23 @@ public:
 		UAISenseConfig_Sight* ConfigSight = nullptr;
 	UPROPERTY(EditDefaultsOnly)
 		UAISenseConfig_Damage* ConfigDamage = nullptr;
+	UPROPERTY()
+		UBehaviorTreeComponent* BehaviorTreeComponent = nullptr;
+	UPROPERTY()
+		UBlackboardComponent* BlackboardComponent = nullptr;
 
 	FOnTargetChanged TargetChanged;
 	ETeam CurrentTeam = ETeam::None;
 
 	ATC_MinionController();
-	FGenericTeamId GetGenericTeamId() const override;
 	AActor* GetTarget() const;
 	
 	void SetTarget(AActor* NewTarget);
 	void InitFSM();
 	void ChangeFSMState(EState State);
+	FGenericTeamId GetGenericTeamId() const override;
+
+	virtual void OnPossess(APawn* InPawn) override;
 
 protected:
 	void BeginPlay() override;
